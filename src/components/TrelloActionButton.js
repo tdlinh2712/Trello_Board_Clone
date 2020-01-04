@@ -34,14 +34,13 @@ class TrelloActionButton extends React.Component {
   }
 
   handleAddList = () => {
-    const {dispatch,listIndex} = this.props;
-    console.log(listIndex);
+    const {dispatch} = this.props;
     const {text} = this.state;
     if (text) {
       this.setState({
         text:"",
       })
-      addListToFirebase(text,listIndex);
+      addListToFirebase(text);
       //dispatch(addList(text));
     }
     return;
@@ -50,12 +49,11 @@ class TrelloActionButton extends React.Component {
   handleAddCard = () => {
     const {dispatch,listID,cardIndex} = this.props;
     const {text} = this.state;
-    console.log(cardIndex);
     if (text) {
       this.setState({
         text:"",
       })
-      const card = addCardToFirebase(listID,text,cardIndex);
+      const card = addCardToFirebase(listID,text);
       console.log(card);
       this.props.dispatch(addCard(listID,card));
     }

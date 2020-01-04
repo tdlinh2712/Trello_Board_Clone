@@ -28,13 +28,13 @@ export const fetchLists = lists => {
 export function getListsThunk() {
   return dispatch => {
     const lists = [];
-    database.ref(`/`).orderByChild("index").once('value', snap => {
+    database.ref(`/`).once('value', snap => {
           snap.forEach(data => {
             let list = data.val();
             if(!list.cards) {
               list.cards = [];
             } else {
-              const cardArray=Object.values(list.cards).sort((a,b)=> a.index-b.index);
+              const cardArray=Object.values(list.cards);
               list.cards = cardArray;
             }
             lists.push(list)
@@ -50,13 +50,29 @@ export function watchListAddedEvent(dispatch) {
   });
 }
 
+export function watchListDeletedEvent(dispatch) {
+  database.ref(`/`).on('child_removed', (snap) => {
+    console.log(snap.val());
+    dispatch(deleteList(snap.val().id));
+  });
+}
+
+export const deleteList = listID => {
+  return {
+    type: CONSTANTS.DELETE_LIST,
+    payload: listID
+  }
+}
+
+
 export const sort = (
   droppableIdStart,
   droppableIdEnd,
   droppableIndexStart,
   droppableIndexEnd,
   draggableId,
-  type
+  type,
+  newCardId
 ) => {
   console.log("heyy");
   //drag list
@@ -68,32 +84,15 @@ export const sort = (
       droppableIndexStart,
       droppableIndexEnd,
       draggableId,
-      type
+      type,
+      newCardId
     }
   }
 }
 
-// export function updateDragThunk(
-//     droppableIdStart,
-//     droppableIdEnd,
-//     droppableIndexStart,
-//     droppableIndexEnd,
-//     draggableId,
-//     type
-// ) {
-//   return dispatch => {
-//     const lists = [];
-//     database.ref(`/`).once('value', snap => {
-//       console.log("drag thunk:", snap.val());
-//     }
-//     )
-//     .then(() => dispatch(sort((
-//       droppableIdStart,
-//       droppableIdEnd,
-//       droppableIndexStart,
-//       droppableIndexEnd,
-//       draggableId,
-//       type
-//     ))))
-//   }
-// }
+export const editTitle = (listID, listTitle) => {
+  return {
+    type: CONSTANTS.EDIT_LIST_TITLE,
+    payload: {listID:listID,listTitle:listTitle}
+  }
+}

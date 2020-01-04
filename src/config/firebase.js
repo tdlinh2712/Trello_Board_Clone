@@ -15,13 +15,12 @@ const config = {
 firebase.initializeApp(config);
 const database = firebase.database()
 
-export const addListToFirebase = (title,listIndex) => {
+export const addListToFirebase = (title) => {
   //this will give us a unique id for our tasks
   const id = Date.now();
   const cards = null;
-  const index = listIndex
   database.ref(`/${id}`).set({
-    title, id, cards,index
+    title, id, cards
   })
 }
 
@@ -29,45 +28,22 @@ export const removeListFromFirebase = (id) => {
     database.ref(`/${id}`).remove()
 }
 
-export const addCardToFirebase = (listID,text,cardIndex) => {
+export const addCardToFirebase = (listID,text) => {
   //this will give us a unique id for our tasks
   const id = Date.now();
-  const index= cardIndex;
   const cards = null;
   database.ref(`/${listID}/cards/${id}`).set({
-    id, text,index
+    id, text
   })
   const card = {id:id,text:text}
   return card
   //dispatch(addCard(dispatch,listID,card));
 }
 
-// export const sortFirebase = (droppableIdStart,
-// droppableIdEnd,
-// droppableIndexStart,
-// droppableIndexEnd,
-// draggableId,
-// type) => {
-//   //this will give us a unique id for our tasks
-//   console.log(droppableIdStart,
-//   droppableIdEnd,
-//   droppableIndexStart,
-//   droppableIndexEnd,
-//   draggableId,
-//   type);
-//   //drag list
-//   if(type==="list") {
-//     const sourceId=draggableId;
-//     const ref = database.ref(`/${draggableId}`);
-//     moveFbRecord(droppableIndexStart,droppableIndexEnd);
-//   }
-//   updateDragThunk(droppableIdStart,
-//   droppableIdEnd,
-//   droppableIndexStart,
-//   droppableIndexEnd,
-//   draggableId,
-//   type);
-// }
+export const deleteCardfromFirebase = (listID,cardId) => {
+  database.ref(`/${listID}/cards/${cardId}`).remove();
+}
+
 
 export function moveFirebaseList(droppableIndexStart, droppableIndexEnd) {
      database.ref(`/`).once('value', function(snap)  {
@@ -83,55 +59,55 @@ export function moveFirebaseList(droppableIndexStart, droppableIndexEnd) {
           if(!listEnd.cards) {
             listEnd.cards = [];
           }
-          // database.ref(`/${listStart.id}`).set({cards: listEnd.cards,id:listStart.id,title: listEnd.title});
-          // database.ref(`/${listEnd.id}`).set({cards: listStart.cards,id:listEnd.id,title:listStart.title});
-          let tg = listStart.index;
-          database.ref(`/${listStart.id}`).update({index:listEnd.index});
-          database.ref(`/${listEnd.id}`).update({index:listStart.index});
+          database.ref(`/${listStart.id}`).update({cards: listEnd.cards,title: listEnd.title});
+          database.ref(`/${listEnd.id}`).update({cards: listStart.cards,title:listStart.title});
+          // let tg = listStart.index;
+          // database.ref(`/${listStart.id}`).update({index:listEnd.index});
+          // database.ref(`/${listEnd.id}`).update({index:listStart.index});
      });
 }
 
-export function moveFirebaseCard(droppableIdStart,droppableIdEnd,droppableIndexStart,droppableIndexEnd,draggableId) {
+export function changeListTitleInFirebase(listID, listTitle) {
+  database.ref(`/${listID}`).update({title:listTitle});
+}
+
+export const moveFirebaseCard = (droppableIdStart,droppableIdEnd,droppableIndexStart,droppableIndexEnd,draggableId) => {
+     let newCardId;
      database.ref(`/`).once('value', function(snap)  {
           const value = snap.val();
-          console.log("value:",value);
-          const valueArray = Object.values(value).sort((a,b) => a.index-b.index);
-
+          const valueArray = Object.values(value);
           let listStart = value[droppableIdStart];
           let listEnd = value[droppableIdEnd];
           if(!listStart.cards) {
             listStart.cards = [];
           } else {
-            let startCards = Object.values(listStart.cards).sort((a, b) => a.index - b.index);
+            let startCards = Object.values(listStart.cards);
             listStart.cards = startCards;
           }
           if(!listEnd.cards) {
             listEnd.cards = [];
           } else {
-            let endCards = Object.values(listEnd.cards).sort((a, b) => a.index - b.index);
+            let endCards = Object.values(listEnd.cards);
             listEnd.cards = endCards;
           }
 
-
-
           const card = listStart.cards[droppableIndexStart];
-          //console.log(droppableIndexStart,card);
-          // database.ref(`/${listStart.id}`).set({cards: listEnd.cards,id:listStart.id,title: listEnd.title});
-          // database.ref(`/${listEnd.id}`).set({cards: listStart.cards,id:listEnd.id,title:listStart.title});
-          let tg = listStart.index;
-          database.ref(`/${listStart.id}/cards/${card.id}`).remove();
-          for(var i=droppableIndexStart+1;i<listStart.cards.length;i++)
-          {
-            database.ref(`/${listStart.id}/cards/${listStart.cards[i].id}`).update({index:i-1});
-          }
-          card.index=droppableIndexEnd;
-          for(var i=droppableIndexEnd;i<listEnd.cards.length;i++)
-          {
-            database.ref(`/${listEnd.id}/cards/${listEnd.cards[i].id}`).update({index:i+1});
-          }
-          database.ref(`/${listEnd.id}/cards/${card.id}`).set(card);
 
+          database.ref(`/${listStart.id}/cards/${card.id}`).remove();
+          listStart.cards.splice(droppableIndexStart,1)
+
+          newCardId = Date.now();
+          card.id=newCardId;
+          database.ref(`/${listEnd.id}/cards/${newCardId}`).set(card);
+          listEnd.cards.push(card);
+
+          for(var i=droppableIndexEnd+1;i<listEnd.cards.length;i++) {
+            database.ref(`/${listEnd.id}/cards/${listEnd.cards[i].id}`).update({text:listEnd.cards[i-1].text});
+            console.log(listEnd.cards);
+          }
+          database.ref(`/${listEnd.id}/cards/${listEnd.cards[droppableIndexEnd].id}`).update({text:card.text});
      });
+     return newCardId;
 }
 
 

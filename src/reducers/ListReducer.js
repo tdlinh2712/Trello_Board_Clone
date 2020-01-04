@@ -56,7 +56,6 @@ const listReducer = (state = [], action) => {
           return list;
         }
       });
-      console.log(newState);
       return newState;
     case CONSTANTS.DRAG_HAPPENED:
       const {
@@ -73,43 +72,39 @@ const listReducer = (state = [], action) => {
       if(type==="list") {
         const list = newStateList.splice(droppableIndexStart,1);
         newStateList.splice(droppableIndexEnd,0,...list);
+        //switch id
+        let tgId=newStateList[droppableIndexStart].id;
+        newStateList[droppableIndexStart].id=newStateList[droppableIndexEnd].id;
+        newStateList[droppableIndexEnd].id=tgId;
         return newStateList;
       }
-      //same list container
-      if(droppableIdStart === droppableIdEnd) {
-        //console.log("state:",state);
-        let list;
-        for(var i=0;i<state.length;i++) {
-          if(state[i].id==droppableIdStart) {
-            list=state[i];
-            break;
-          }
-        }
-        const card = list.cards.splice(droppableIndexStart, 1);
-        console.log(card);
-        list.cards.splice(droppableIndexEnd,0,...card);
-      }
 
-      if(droppableIdStart !== droppableIdEnd) {
-        //find the list where the drag happened
         let listStart;
         for(var i=0;i<state.length;i++) {
           if(state[i].id==droppableIdStart) {
-            listStart=state[i];
+            listStart= newStateList[i];
             break;
           }
         }
-        console.log(listStart);
-        const card = listStart.cards.splice(droppableIndexStart, 1);
+        let card = listStart.cards.splice(droppableIndexStart, 1);
+        card=card[0];
+        card.id=action.payload.newCardId;
+        console.log(card)
+        //find the list where the drop ended
         let listEnd;
         for(var i=0;i<state.length;i++) {
           if(state[i].id==droppableIdEnd) {
-            listEnd=state[i];
+            listEnd=newStateList[i];
             break;
           }
         }
-        listEnd.cards.splice(droppableIndexEnd,0,...card);
-      }
+        //switch id
+        listEnd.cards.push({id:action.payload.newCardId,text:""});
+        for(var i=listEnd.cards.length-1;i>droppableIndexEnd;i--) {
+          listEnd.cards[i].text=listEnd.cards[i-1].text;
+        }
+        listEnd.cards[droppableIndexEnd].text=card.text;
+
       return newStateList;
     case CONSTANTS.FETCH_LISTS:
         return action.payload;
@@ -120,6 +115,57 @@ const listReducer = (state = [], action) => {
           id:action.payload.id,
         }
         return [...state,newList1];
+    case CONSTANTS.DELETE_CARD:
+      let ind
+      let listCard;
+      //find the list
+      let afterDeleteCardState = state.map((list,index) => {
+        if(list.id===action.payload.listID) {
+          listCard=list;
+          ind=index;
+        }
+        return list;
+      })
+      afterDeleteCardState.splice(ind,1);
+      let cardIndex;
+      let newCards=[];
+      for(var i=0;i<listCard.cards.length;i++) {
+        if(listCard.cards[i].id!==action.payload.cardId)
+        {
+          newCards.push(listCard.cards[i]);
+        }
+      }
+      const newList = {
+        title:listCard.title,
+        id:listCard.id,
+        cards:newCards
+      }
+      afterDeleteCardState.splice(ind,0,newList);
+      return afterDeleteCardState;
+    case CONSTANTS.DELETE_LIST:
+      let index;
+      let afterDeleteListState = state.map((list,i) => {
+        if(list.id===action.payload) {
+          index=i;
+        }
+        return list;
+      });
+      afterDeleteListState.splice(index,1);
+      console.log(afterDeleteListState)
+      return afterDeleteListState;
+    case CONSTANTS.EDIT_LIST_TITLE:
+    const afterEditTitleState = state.map((list,index) => {
+      if(list.id===action.payload.listID) {
+        return {
+          ...list,
+          title: action.payload.listTitle
+        }
+      } else
+        {
+          return list
+        }
+    })
+    return afterEditTitleState
     default:
       return state;
   }

@@ -7,7 +7,7 @@ import TrelloActionButton from './TrelloActionButton';
 import {DragDropContext, Droppable} from 'react-beautiful-dnd';
 import {sort} from '../actions';
 import styled from 'styled-components';
-import { getListsThunk, watchListAddedEvent,updateDragThunk} from '../actions/listsActions';
+import { getListsThunk, watchListAddedEvent,updateDragThunk,watchListDeletedEvent} from '../actions/listsActions';
 import {watchCardAddedEvent} from '../actions/cardsActions';
 import {moveFirebaseList,moveFirebaseCard} from '../config/firebase';
 
@@ -24,15 +24,17 @@ class App extends Component {
       return;
     }
     //update in firebase
+    let newCardId;
     if(type==="list")
     {
       moveFirebaseList(source.index, destination.index)
     } else {
-      moveFirebaseCard(source.droppableId,
+      newCardId = moveFirebaseCard(source.droppableId,
         destination.droppableId,
         source.index,
         destination.index,
         draggableId);
+      console.log("new card id", newCardId)
     }
     //update in interface
     this.props.dispatch(sort(
@@ -41,7 +43,8 @@ class App extends Component {
       source.index,
       destination.index,
       draggableId,
-      type
+      type,
+      newCardId
     )
   );
   }
@@ -83,6 +86,7 @@ const mapDispatch = dispatch => {
   let actions = bindActionCreators({ sort });
   dispatch(getListsThunk())
   watchListAddedEvent(dispatch)
+  watchListDeletedEvent(dispatch)
   return {
     ...actions,dispatch
   }
