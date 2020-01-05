@@ -7,11 +7,20 @@ import {createStore, applyMiddleware} from 'redux';
 import reduxThunk from 'redux-thunk';
 import App from './components/App';
 import * as serviceWorker from './serviceWorker';
+import { createGlobalStyle } from "styled-components";
 
+const GlobalStyle = createGlobalStyle`
+  html {
+    background-color: #854085;
+    box-sizing: border-box;
+    transition: all 0.5s ease-in;
+  }
+`;
 
 ReactDOM.render(
   <Provider store={store}>
-    <App />
+    <GlobalStyle />
+      <App />
   </Provider>,
   document.getElementById('root')
 );
