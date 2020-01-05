@@ -10,6 +10,7 @@ import styled from 'styled-components';
 import { getListsThunk, watchListAddedEvent,updateDragThunk,watchListDeletedEvent} from '../actions/listsActions';
 import {watchCardAddedEvent} from '../actions/cardsActions';
 import {moveFirebaseList,moveFirebaseCard} from '../config/firebase';
+import TrelloCreate from "./TrelloCreate";
 
 const ListContainer=styled.div`
   display:flex;
@@ -62,7 +63,7 @@ class App extends Component {
                   <TrelloList listID={list.id} key={list.id} title={list.title} cards = {list.cards} index={index}/>
                 )}
                 {provided.placeholder}
-                <TrelloActionButton list listIndex={lists.length}/>
+                <TrelloCreate list />
               </ListContainer>
             )}
           </Droppable>
