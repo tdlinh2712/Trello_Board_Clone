@@ -59,6 +59,7 @@ const TrelloList = ({title, cards, listID, index,dispatch}) => {
   };
 
   const renderEditInput = () => {
+  
     return (
       <form onSubmit={handleFinishEditing}>
         <StyledInput

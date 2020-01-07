@@ -110,6 +110,10 @@ export const moveFirebaseCard = (droppableIdStart,droppableIdEnd,droppableIndexS
      return newCardId;
 }
 
+export function editCardInFirebase(id,listID,cardText) {
+  database.ref(`/${listID}/cards/${id}`).update({text:cardText});
+}
+
 
 
 export default database

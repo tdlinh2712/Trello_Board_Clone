@@ -39,6 +39,7 @@ const initialState = [
   }
 ]
 
+
 const listReducer = (state = [], action) => {
   switch (action.type) {
     case CONSTANTS.ADD_CARD:
@@ -89,7 +90,6 @@ const listReducer = (state = [], action) => {
         let card = listStart.cards.splice(droppableIndexStart, 1);
         card=card[0];
         card.id=action.payload.newCardId;
-        console.log(card)
         //find the list where the drop ended
         let listEnd;
         for(var i=0;i<state.length;i++) {
@@ -151,7 +151,6 @@ const listReducer = (state = [], action) => {
         return list;
       });
       afterDeleteListState.splice(index,1);
-      console.log(afterDeleteListState)
       return afterDeleteListState;
     case CONSTANTS.EDIT_LIST_TITLE:
     const afterEditTitleState = state.map((list,index) => {
@@ -165,7 +164,28 @@ const listReducer = (state = [], action) => {
           return list
         }
     })
-    return afterEditTitleState
+    return afterEditTitleState;
+    case CONSTANTS.EDIT_CARD:
+      let afterEditCardState = state.map((list) => {
+        if(list.id===action.payload.listID) {
+          return {
+            ...list,
+            cards:list.cards.map((card) => {
+              if(card.id===action.payload.cardId) {
+                return {
+                  ...card,
+                  text:action.payload.cardText
+                }
+              } else {
+                return card;
+              }
+            })
+          }
+        } else {
+          return list;
+        }
+      } )
+      return afterEditCardState;
     default:
       return state;
   }

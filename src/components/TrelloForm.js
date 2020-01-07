@@ -17,7 +17,7 @@ padding: 6px 8px 2px;
 
 const StyledTextArea = styled(Textarea)`
 resize: none;
-width: 100%;
+max-width: 100%;
 overflow: hidden;
 outline: none;
 border: none;
@@ -36,7 +36,7 @@ cursor: pointer;
 `;
 
 const TrelloForm = React.memo(
-({ list, text = "", onChange, closeForm, children }) => {
+({ list, text, onChange, closeForm, children }) => {
   const placeholder = list
     ? "Enter list title..."
     : "Enter a title for this card...";
@@ -55,6 +55,7 @@ const TrelloForm = React.memo(
       <ButtonContainer>
         {children}
         <StyledIcon onMouseDown={closeForm}>close</StyledIcon>
+
       </ButtonContainer>
     </Container>
   );
