@@ -1,4 +1,5 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+You can try a live demo here: https://tdlinh2712.github.io/Trello_Board_Clone/
 
 ## Available Scripts
 
